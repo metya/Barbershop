@@ -1,3 +1,4 @@
+import re
 import torch
 from torch import nn
 from models.Net import Net
@@ -99,6 +100,8 @@ class Embedding(nn.Module):
         device = self.opts.device
         ibar = tqdm(self.dataloader, desc='Images')
         for ref_im_H, ref_im_L, ref_name in ibar:
+            if self.check_W_exists(ref_name):
+                continue
             optimizer_W, latent = self.setup_W_optimizer()
             pbar = tqdm(range(self.opts.W_steps), desc='Embedding', leave=False)
             for step in pbar:
@@ -127,15 +130,14 @@ class Embedding(nn.Module):
             self.save_W_results(ref_name, gen_im, latent_in)
 
 
-
-
     def invert_images_in_FS(self, image_path=None):
         self.setup_dataloader(image_path=image_path)
         output_dir = self.opts.output_dir
         device = self.opts.device
         ibar = tqdm(self.dataloader, desc='Images')
         for ref_im_H, ref_im_L, ref_name in ibar:
-
+            if self.check_FS_exists(ref_name):
+                continue    
             latent_W_path = os.path.join(output_dir, 'W+', f'{ref_name[0]}.npy')
             latent_W = torch.from_numpy(convert_npy_code(np.load(latent_W_path))).to(device)
             F_init, _ = self.net.generator([latent_W], input_is_latent=True, return_latents=False, start_layer=0, end_layer=3)
@@ -168,8 +170,6 @@ class Embedding(nn.Module):
             self.save_FS_results(ref_name, gen_im, latent_in, latent_F)
 
 
-
-
     def cal_loss(self, im_dict, latent_in, latent_F=None, F_init=None):
         loss, loss_dic = self.loss_builder(**im_dict)
         p_norm_loss = self.net.cal_p_norm_loss(latent_in)
@@ -198,7 +198,15 @@ class Embedding(nn.Module):
         save_im.save(image_path)
         np.save(latent_path, save_latent)
 
-
+    def check_W_exists(self, ref_name):
+        output_dir = os.path.join(self.opts.output_dir, 'W+')
+        latent_path = os.path.join(output_dir, f'{ref_name[0]}.npy')
+        image_path = os.path.join(output_dir, f'{ref_name[0]}.png')
+        
+        if os.path.exists(latent_path) and os.path.exists(image_path):
+            return True
+        else:
+            return False
 
     def save_W_intermediate_results(self, ref_name, gen_im, latent_in, step):
 
@@ -230,6 +238,15 @@ class Embedding(nn.Module):
         np.savez(latent_path, latent_in=latent_in.detach().cpu().numpy(),
                  latent_F=latent_F.detach().cpu().numpy())
 
+    def check_FS_exists(self, ref_name):
+        output_dir = os.path.join(self.opts.output_dir, 'FS')
+        latent_path = os.path.join(output_dir, f'{ref_name[0]}.npz')
+        image_path = os.path.join(output_dir, f'{ref_name[0]}.png')
+        
+        if os.path.exists(latent_path) and os.path.exists(image_path):
+            return True
+        else:
+            return False
 
     def set_seed(self):
         if self.opt.seed:

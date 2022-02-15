@@ -155,14 +155,18 @@ dependencies:
   - zipp=3.5.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.9=haebb681_0
+  - streamlit
+  # - dlib
+  # - cmake
   - pip:
+    - cmake
     - beautifulsoup4==4.10.0
     - cachetools==4.2.4
     - charset-normalizer==2.0.7
-    - click==8.0.3
-    - clip==1.0
+    - click
+    - clip
     - deprecated==1.2.13
-    - dlib==19.22.1
+    # - dlib==19.22.1
     - et-xmlfile==1.1.0
     - filelock==3.4.0
     - ftfy==6.0.3
@@ -206,4 +210,5 @@ dependencies:
     - uritemplate==3.0.1
     - urllib3==1.26.7
     - wrapt==1.13.3
+    - natsort
 prefix: ~/.conda/envs/Barbershop

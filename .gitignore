@@ -137,3 +137,11 @@ wandb/
 .idea
 cache
 pretrained_models/seg.pth
+
+output/
+
+input/
+
+iis2/
+
+unprocessed/
